@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
+<<<<<<< HEAD
+	<name>FileWriter</name>
+=======
 	<name>course</name>
+>>>>>>> dbd7bcf86b21f3714969a4fafe13389f149ef6db
 	<comment></comment>
 	<projects>
 	</projects>
