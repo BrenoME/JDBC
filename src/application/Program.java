@@ -1,85 +1,87 @@
 package application;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
+import java.sql.ResultSet;
 
 public class Program {
-
 	public static void main(String[] args) {
-		/*
-		// Instancia uma nova classe FILE a partir de um documento já existente.
-		File arquivo = new File("D://Documentos/ini.txt");
-		
-		Scanner sc = null;
 		
 		try {
-			// O objeto sc é instanciado a partir de uma classe Scanner que recebe o objeto do tipo FILE como parametro para leitura.
-			sc = new Scanner(arquivo);
-			while(sc.hasNextLine()) {
-				// Imprimindo o conteúdo do arquivo.
-				System.out.println(sc.nextLine());
-			}
-		}catch(IOException e) {
-			// Tratando um possível erro de acesso.
-			System.out.println("Erro:"+  e.getMessage());
-		}finally {
-			if(sc != null) {
-				// Encerramento do objeto sc.
-				sc.close();
-			}
-		*/
-		
-		/*
-		//Instanciando o objeto path com o diretório do arquivo existente.
-		String path = "D://Documentos/ini.txt";
-		
-		//Declara os objetos de leitura de arquivo.
-		FileReader fr = null;
-		BufferedReader br = null;
-		
-		try {
-			//Passando os parametros e instanciando os objetos.
-			fr = new FileReader(path);
-			br = new BufferedReader(fr);
-			//Método de leitura.
-			String line = br.readLine();
 			
-			//Enquanto não chegar à ultima linha, leia a proxima linha 
-			while (line != null) {
-				System.out.println(line);
-				line = br.readLine();
-			}
-		}catch(IOException e) {
-			System.out.println("Erro: " + e.getMessage());
-		}finally {
-			//Caso os leitores de arquivo não sejam nulos, feche-os.
-			try {
-				if(br != null) br.close();
-				if(fr != null) fr.close();
-			}catch(IOException e) {
-				e.printStackTrace();
-			}
-		}*/
+			String driverName = "com.mysql.cj.jdbc.Driver";                        
+			Class.forName(driverName);
 		
-		/*
-		String source = "D://Documentos/ini.txt";
-		
-		try(BufferedReader buff = new BufferedReader(new FileReader(source))){
+			String url = "jdbc:mysql://";
+			String server = "localhost:3306/";
+			String database = "aplicacao";
+			String user = "root";
+			String password = "root";
+			String time = "?useTimezone=true&serverTimezone=UTC";
+				
+			Connection conn = DriverManager.getConnection(url + server + database + time, user , password);
 			
-			String txt = buff.readLine();
+			System.out.println("O que deseja?");
+			Scanner sc = new Scanner(System.in);
+			String opcao = sc.next();
+			sc.nextLine();
 			
-			while (txt != null) {
-				System.out.println(txt);
-				txt = buff.readLine();
+			String query,nome,email,login,senha;
+			
+			PreparedStatement ps = null;
+			ResultSet rs = null;
+			
+			if("procurar".equals(opcao)) { 
+				query = "select * from conta where email = ? ";
+				System.out.println("Qual email deseja procurar ?");
+				email = sc.nextLine();
+				if (!email.contains("@") && email.toLowerCase().charAt(0) == 'n')query = "select * from conta"; ;
+				ps = conn.prepareStatement(query);
+				if(query.contains("@"))ps.setString(1,email);
+				
+				rs = ps.executeQuery();
+			};
+			
+			if("inserir".equals(opcao)) { 
+				query = "insert into conta (nome,email,login,senha) values (?,?,?,?)";
+				System.out.println("Insira os dados na seguinte ordem:");
+				System.out.println("1.nome");
+				nome = sc.nextLine();
+				System.out.println("2.email");
+				email = sc.nextLine();
+				System.out.println("3.login");
+				login = sc.nextLine();
+				System.out.println("4.senha");
+				senha = sc.next();
+				
+				ps = conn.prepareStatement(query);
+				ps.setString(1,nome);
+				ps.setString(2,email);
+				ps.setString(3,login);
+				ps.setString(4,senha);
+				
+				int row = ps.executeUpdate();
+			};
+			
+			if("procurar".equals(opcao)) {
+				while(rs.next()) {
+					System.out.printf(rs.getString("login") + "\t | \t" + rs.getString("senha") + "\t | \t" + rs.getString("email") + "\t | \t" + rs.getString("nome") + "\n\n");
+				}
 			}
 			
-		}catch(IOException e) {
-			System.out.println("Erro: "+ e.getMessage());
-		}
-		*/
+			sc.close();
+			if(rs != null)rs.close();
+			if(ps != null)ps.close();
+			if(conn != null)conn.close();
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}			
 	}
 
 }
